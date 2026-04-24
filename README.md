@@ -11,8 +11,8 @@ A simple web app to help you pick a random project idea and avoid decision paral
 ## Tech
 - HTML, CSS, JavaScript
 
-## Demo
-(open index.html)
+## Live Demo
+https://workgs676-afk.github.io/idea-picker/
 
 # idea-picker
 A simple web app that randomly picks a project idea from your list to beat decision paralysis. 
