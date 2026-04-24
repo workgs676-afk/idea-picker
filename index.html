@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idea Picker</title>
+  <style>
+    :root {
+      --bg-1: #fffaf2;
+      --bg-2: #ffe7c2;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-border: rgba(110, 74, 31, 0.12);
+      --text: #2d2116;
+      --muted: #7a6656;
+      --accent: #ff8a3d;
+      --accent-2: #ffb347;
+      --shadow: 0 22px 50px rgba(106, 63, 14, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 38%),
+        radial-gradient(circle at bottom right, rgba(255, 202, 128, 0.55), transparent 32%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+    }
+
+    .app {
+      width: min(100%, 760px);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .slot {
+      position: relative;
+      overflow: hidden;
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 24px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 138, 61, 0.2);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 244, 230, 0.94));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .slot::before,
+    .slot::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 138, 61, 0.35), transparent);
+    }
+
+    .slot::before {
+      top: 18px;
+    }
+
+    .slot::after {
+      bottom: 18px;
+    }
+
+    .result {
+      margin: 0;
+      font-size: clamp(1.5rem, 3.4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.2;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .result.placeholder {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .result.picking {
+      animation: flicker 120ms linear infinite;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(80, 44, 10, 0.12);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      box-shadow: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+
+    .secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid rgba(110, 74, 31, 0.12);
+    }
+
+    .textarea-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      border-radius: 20px;
+      border: 1px solid rgba(110, 74, 31, 0.14);
+      padding: 16px;
+      font: inherit;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.92);
+      outline: none;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    textarea:focus {
+      border-color: rgba(255, 138, 61, 0.55);
+      box-shadow: 0 0 0 4px rgba(255, 138, 61, 0.12);
+    }
+
+    .footer {
+      margin-top: 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @keyframes flicker {
+      0% { transform: translateY(0); opacity: 0.7; }
+      50% { transform: translateY(-2px); opacity: 1; }
+      100% { transform: translateY(0); opacity: 0.75; }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .slot {
+        min-height: 130px;
+        padding: 20px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Idea Picker</h1>
+      <p class="subtitle">Paste your ideas, pull the lever, and let chance decide.</p>
+    </header>
+
+    <section class="slot" aria-live="polite">
+      <p id="result" class="result placeholder">Your picked idea will appear here</p>
+    </section>
+
+    <div class="controls">
+      <button id="pickButton" class="primary" type="button">Pick One</button>
+      <button id="removeButton" class="secondary" type="button" disabled>Remove picked idea</button>
+      <button id="clearButton" class="secondary" type="button">Clear all</button>
+    </div>
+
+    <div class="textarea-wrap">
+      <label for="ideasInput">Ideas (one per line)</label>
+      <textarea id="ideasInput" placeholder="Build a study tracker&#10;Create a recipe finder&#10;Make a habit challenge app"></textarea>
+    </div>
+
+    <p class="footer"><span id="count">0</span> ideas ready to pick</p>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "idea-picker-ideas";
+
+    const ideasInput = document.getElementById("ideasInput");
+    const pickButton = document.getElementById("pickButton");
+    const removeButton = document.getElementById("removeButton");
+    const clearButton = document.getElementById("clearButton");
+    const result = document.getElementById("result");
+    const count = document.getElementById("count");
+
+    let currentPick = "";
+    let pickTimer = null;
+
+    function parseIdeas(text) {
+      return text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    function setIdeas(ideas) {
+      const cleanIdeas = ideas.filter(Boolean);
+      ideasInput.value = cleanIdeas.join("\n");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanIdeas));
+      updateCount(cleanIdeas.length);
+      updateButtons();
+    }
+
+    function getIdeas() {
+      return parseIdeas(ideasInput.value);
+    }
+
+    function updateCount(total) {
+      count.textContent = total;
+    }
+
+    function updateButtons() {
+      const ideas = getIdeas();
+      pickButton.disabled = ideas.length === 0;
+      removeButton.disabled = !currentPick || !ideas.includes(currentPick);
+    }
+
+    function showPlaceholder(message) {
+      result.textContent = message;
+      result.classList.add("placeholder");
+      result.classList.remove("picking");
+    }
+
+    function showPickedIdea(idea) {
+      result.textContent = idea;
+      result.classList.remove("placeholder", "picking");
+    }
+
+    function saveFromTextarea() {
+      const ideas = getIdeas();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+
+      if (currentPick && !ideas.includes(currentPick)) {
+        currentPick = "";
+      }
+
+      if (!ideas.length) {
+        currentPick = "";
+        showPlaceholder("Your picked idea will appear here");
+      }
+
+      updateCount(ideas.length);
+      updateButtons();
+    }
+
+    function randomIdea(ideas) {
+      return ideas[Math.floor(Math.random() * ideas.length)];
+    }
+
+    function pickIdea() {
+      const ideas = getIdeas();
+      if (!ideas.length) {
+        showPlaceholder("Add a few ideas to get started");
+        updateButtons();
+        return;
+      }
+
+      pickButton.disabled = true;
+      removeButton.disabled = true;
+      result.classList.remove("placeholder");
+      result.classList.add("picking");
+
+      let ticks = 0;
+      const totalTicks = 16;
+
+      clearInterval(pickTimer);
+      pickTimer = setInterval(() => {
+        result.textContent = randomIdea(ideas);
+        ticks += 1;
+
+        if (ticks >= totalTicks) {
+          clearInterval(pickTimer);
+          currentPick = randomIdea(ideas);
+          showPickedIdea(currentPick);
+          updateButtons();
+        }
+      }, 85);
+    }
+
+    function removePickedIdea() {
+      if (!currentPick) {
+        return;
+      }
+
+      const ideas = getIdeas().filter((idea) => idea !== currentPick);
+      setIdeas(ideas);
+      showPlaceholder(ideas.length ? "Picked idea removed. Spin again." : "No ideas left. Add more to continue.");
+      currentPick = "";
+      updateButtons();
+    }
+
+    function clearAll() {
+      currentPick = "";
+      setIdeas([]);
+      localStorage.removeItem(STORAGE_KEY);
+      showPlaceholder("Your picked idea will appear here");
+      ideasInput.focus();
+    }
+
+    function loadIdeas() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        if (Array.isArray(saved)) {
+          setIdeas(saved.map((item) => String(item).trim()).filter(Boolean));
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to load saved ideas", error);
+      }
+
+      setIdeas([]);
+    }
+
+    ideasInput.addEventListener("input", saveFromTextarea);
+    pickButton.addEventListener("click", pickIdea);
+    removeButton.addEventListener("click", removePickedIdea);
+    clearButton.addEventListener("click", clearAll);
+
+    loadIdeas();
+    showPlaceholder("Your picked idea will appear here");
+  </script>
+</body>
+</html>
